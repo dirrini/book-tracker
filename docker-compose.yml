@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+    container_name: bookapp_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/usr/src/app            # Maps local frontend to container
+      - /usr/src/app/node_modules          # Protects container node_modules
+      - /usr/src/app/.next                 # Prevents local cache overriding build files
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+    depends_on:
+      - api
+
+  # Fastify Backend API
+  api:
+    build:
+      context: ./backend
+      target: development
+    container_name: bookapp_api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/usr/src/app             # Maps local backend to container
+      - /usr/src/app/node_modules          # Protects container node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - DATABASE_URL=postgres://postgres:local_secure_pass@postgres_db:5432/bookdb
+      - REDIS_URL=redis://redis_cache:6379
+      - JWT_SECRET=your_local_development_secret_key_123!
+    command: sh -c "node database/init-db.js && npm run dev"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      redis_cache:
+        condition: service_healthy
+
+  # PostgreSQL Database
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: bookapp_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=local_secure_pass
+      - POSTGRES_DB=bookdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bookdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache Layer
+  redis_cache:
+    image: redis:7-alpine
+    container_name: bookapp_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

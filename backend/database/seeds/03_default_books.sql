@@ -1,0 +1,2 @@
+UPDATE books SET title = '1984', author = 'George Orwell', cover_image_url = 'https://covers.openlibrary.org/b/isbn/0451524934-L.jpg' WHERE id = '0451524934';
+UPDATE books SET title = 'The Hobbit', author = 'J.R.R. Tolkien', cover_image_url = 'https://covers.openlibrary.org/b/isbn/0345339681-L.jpg' WHERE id = '0345339681';

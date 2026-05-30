@@ -1,0 +1,6 @@
+# Block dependencies from being tracked by Git
+node_modules/
+.env
+
+# Block Next.js build folders
+frontend/.next/
