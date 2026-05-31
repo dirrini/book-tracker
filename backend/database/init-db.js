@@ -27,10 +27,8 @@ async function main() {
   try {
     // 1. Run schemas
     await runScripts('migrations');
-    // 2. Run seeds (only in development)
-    if (process.env.NODE_ENV === 'development') {
-      await runScripts('seeds');
-    }
+    // 2. Run seeds
+    await runScripts('seeds');
     console.log('[DB INIT] Database migration and seeding completed successfully.');
     process.exit(0);
   } catch (err) {
