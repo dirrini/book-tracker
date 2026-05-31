@@ -18,4 +18,4 @@ RUN npm ci --only=production
 COPY . .
 USER node
 EXPOSE 5000
-CMD ["node", "src/app.js"]
+CMD ["sh", "-c", "node database/init-db.js && node src/app.js"]
